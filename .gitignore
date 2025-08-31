@@ -1,0 +1,18 @@
+# dbt artifacts
+target/
+dbt_packages/
+logs/
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Secrets
+*.json
+.env
