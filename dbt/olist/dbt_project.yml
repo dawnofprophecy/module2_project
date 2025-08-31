@@ -1,0 +1,23 @@
+name: "olist"
+version: "1.0.0"
+config-version: 2
+profile: "olist_bigquery"
+
+models:
+  olist:
+    +materialized: table
+
+    staging:
+      +schema: "olist_silver"
+      +materialized: view
+
+    intermediate:
+      +schema: "olist_silver"
+      +materialized: table
+
+    marts:
+      +schema: "olist_gold"
+      dims:
+        +materialized: table
+      facts:
+        +materialized: table

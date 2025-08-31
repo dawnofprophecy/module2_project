@@ -1,0 +1,34 @@
+version: 2
+models:
+  - name: stg_orders
+    columns:
+      - name: order_id
+        tests: [not_null, unique]
+      - name: order_status
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['delivered','invoiced','shipped','processing','canceled','unavailable','approved','created']
+
+  - name: stg_order_items
+    columns:
+      - name: order_id
+        tests: [not_null]
+      - name: order_item_id
+        tests: [not_null]
+
+  - name: stg_payments
+    columns:
+      - name: payment_type
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              value_set: ['credit_card','boleto','voucher','debit_card','other','unknown']
+
+  - name: stg_customers
+    columns:
+      - name: customer_id
+        tests: [not_null, unique]
+
+  - name: stg_reviews
+    columns:
+      - name: review_id
+        tests: [not_null, unique]
