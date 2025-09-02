@@ -30,7 +30,7 @@ module2_project/
 
 - **DuckDB** → local CSV exploration, Parquet conversion
 - **BigQuery** → cloud data warehouse
-- **Meltano (optional)** → can orchestrate EL from CSV to BigQuery
+- **Meltano (next phase)** → can orchestrate EL from CSV to BigQuery
 - **dbt Core** → transformations & data modeling
 - **dbt_utils / dbt_expectations** → macros & data quality tests
 - **Python / Jupyter** → ingestion notebooks and ad-hoc analysis
