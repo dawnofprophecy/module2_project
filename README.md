@@ -42,9 +42,9 @@ module2_project/
 ### 1. Ingestion (Bronze Layer)
 - **Source**: 9 CSV files from Olist Kaggle dataset:
   - orders, order_items, payments, reviews, customers, sellers, products, geolocation, product_category_translation
-- **Steps**:
+- **Steps**: Olist_Project_Ingestion.ipynb
   1. Load CSV into **DuckDB** for type-checking and quick validation
-  2. Convert to **Parquet** for efficient columnar storage
+  2. Convert to **Parquet** for efficient columnar storage and store in GCS
   3. Upload Parquet files to **BigQuery** (`olist_bronze` dataset)
 - Why Parquet?  
   - Compressed, efficient for analytics  
