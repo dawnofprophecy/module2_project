@@ -1,7 +1,7 @@
 # Olist E-commerce Data Pipeline
 
 This project implements an **end-to-end data pipeline and analytics workflow** using the [Olist Brazilian E-commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).  
-It shows how raw CSVs (Bronze) are ingested into BigQuery, transformed with dbt into **Silver (staging)** and **Gold (dimensional/fact)** layers, and tested for quality.
+It shows how raw CSVs (Bronze source) are ingested into BigQuery, transformed with dbt into **Silver (staging)** and **Gold (dimensional/fact)** layers, and tested for quality. The Gold dimensions and facts are used for data analysis with Python. Data visulation tools like Tableau, Plotly Dash and LockerStudio are used.
 
 ---
 
@@ -9,19 +9,20 @@ It shows how raw CSVs (Bronze) are ingested into BigQuery, transformed with dbt 
 
 ```
 module2_project/
-├── olist_data/                  # Original Olist CSV datasets (Bronze source)
-├── Olist_Project_Ingestion.jpynb             # Jupyter notebooks/scripts for ingestion
+├── olist_data/                     # Original Olist CSV datasets (Bronze source)
+├── Olist_Project_Ingestion.jpynb   # Jupyter notebooks for ingestion
 ├── dbt/
 │   └── olist/
 │       ├── dbt_project.yml
 │       ├── models/
-│       │   ├── staging/       # Silver: normalized views
-│       │   ├── intermediate/  # Helper aggregations
+│       │   ├── staging/       # Silver: 9 normalized views
+│       │   ├── intermediate/  # geolocation ZIP codes to lat/lng
 │       │   └── marts/
-│       │       ├── dims/      # Gold: dimension tables
-│       │       └── facts/     # Gold: fact tables
+│       │       ├── dims/      # Gold: 6 dimension tables
+│       │       └── facts/     # Gold: 3 fact tables
 │       └── macros/
 └── README.md
+├── Olist_Business_Analysis.jpynb   # Jupyter notebooks for data analysis
 ```
 
 ---
@@ -30,11 +31,11 @@ module2_project/
 
 - **DuckDB** → local CSV exploration, Parquet conversion
 - **BigQuery** → cloud data warehouse
-- **Meltano (next phase)** → can orchestrate EL from CSV to BigQuery
+- **Meltano / Dagstor(next phase)** → Meltano can orchestrate EL from CSV to BigQuery. Dagstor for tranforms/analysics
 - **dbt Core** → transformations & data modeling
 - **dbt_utils / dbt_expectations** → macros & data quality tests
-- **Python / Jupyter** → ingestion notebooks and ad-hoc analysis
-
+- **Python / Jupyter** → ingestion notebooks and ad-hoc data analysis
+- **Tableau / Plotly Dash / LockerStudio** → Data analysis and Dashboard
 ---
 
 ## 🔄 Pipeline Design
@@ -159,10 +160,32 @@ With the Gold layer, you can answer:
 
 ## 🔮 Next Steps
 
-- Add **snapshots** for customer/product history
-- Automate ingestion with **Meltano**
-- Orchestrate pipeline with **Dagster** or **Airflow**
-- Deploy CI/CD (GitHub Actions running `dbt build`)
-- Connect to **BI tool** (Looker Studio, Tableau, Metabase)
+
+### Add **Snapshots**
+- **Why add snapshots?**  
+  Snapshots make sense once we are no longer only working with static Kaggle CSVs, but instead live or updated sources.  
+  - They allow us to capture changes in slowly changing dimensions (SCD Type 2).  
+  - We could start with **customers**, **sellers**, or **orders**, since those entities can change over time (e.g., addresses, order status).
+
+### Automate Ingestion with **Meltano**
+- Use Meltano’s Singer **taps/targets** to manage extract & load into BigQuery.  
+- Integrate `dbt run`, `dbt snapshot`, and `dbt test` as Meltano tasks.  
+- Schedule ingestion + transformation jobs daily/weekly with Meltano’s built-in scheduler.  
+
+### Orchestrate Pipeline with **Dagster** or **Airflow**
+- **Dagster**: Python-native, asset-centric orchestration with strong dbt integration, observability, and partitioning/backfills.  
+- **Airflow**: Widely adopted, task-based DAG orchestration, strong ecosystem for scheduling + monitoring.  
+- Orchestration ensures:  
+  - Bronze ingestion → Silver cleaning → Gold marts run in sequence  
+  - Snapshots run before transformations  
+  - Automated tests + alerts on failures  
+
+### Continue Connecting to **BI Tools**
+- Hook up **Looker Studio**, **Tableau**, or **Plotly Dash** to the Gold layer in BigQuery.  
+- Build dashboards for:  
+  - **Logistics bottlenecks** (delivery delays, freight costs)  
+  - **Regional demand concentration** (Pareto by state, map bubbles)  
+  - **Customer retention & cohorts** (repeat vs new customers)  
+- This closes the loop from **raw data → clean warehouse → actionable insights**.
 
 ---
