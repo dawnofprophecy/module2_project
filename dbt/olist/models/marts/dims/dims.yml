@@ -1,20 +1,81 @@
 version: 2
-models:
-  - name: dim_product
-    columns:
-      - name: product_key
-        tests: [unique, not_null]
-      - name: product_id
-        tests: [not_null]
 
+models:
   - name: dim_customer
+    description: "Customer dimension (one row per customer_key)."
     columns:
       - name: customer_key
-        tests: [unique, not_null]
+        tests: [not_null, unique]
       - name: customer_id
-        tests: [not_null]
+        description: "Natural key from source."
+      - name: state
+      - name: city
+      - name: zip_prefix_key
+        tests:
+          - relationships:
+              to: ref('dim_zip_prefix')
+              field: zip_prefix_key
+
+  - name: dim_product
+    description: "Product dimension (one row per product_key)."
+    columns:
+      - name: product_key
+        tests: [not_null, unique]
+      - name: product_id
+      - name: category_en
+      - name: weight_g
+      - name: length_cm
+      - name: height_cm
+      - name: width_cm
 
   - name: dim_seller
+    description: "Seller dimension (one row per seller_key)."
     columns:
       - name: seller_key
-        tests: [unique, not_null]
+        tests: [not_null, unique]
+      - name: seller_id
+      - name: state
+      - name: city
+      - name: zip_prefix_key
+        tests:
+          - relationships:
+              to: ref('dim_zip_prefix')
+              field: zip_prefix_key
+
+  - name: dim_zip_prefix
+    description: "Geography dimension at ZIP-prefix grain; representative lat/lng per prefix."
+    columns:
+      - name: zip_prefix_key
+        tests: [not_null, unique]
+      - name: zip_prefix
+        tests: [not_null]
+      - name: state
+      - name: city
+      - name: lat
+      - name: lng
+
+  - name: dim_date
+    description: "Date dimension (one row per calendar date)."
+    columns:
+      - name: date_key
+        tests: [not_null, unique]
+      - name: date_day
+        tests: [not_null]
+      - name: year
+      - name: month
+      - name: day
+      - name: dow
+      - name: month_name
+
+  - name: dim_payment_method
+    description: "Payment method lookup (standardized types)."
+    columns:
+      - name: payment_method_key
+        tests: [not_null, unique]
+      - name: payment_type
+        description: "Standardized name (e.g., credit_card, boleto, debit_card, voucher, other, unknown)."
+        tests:
+          - not_null
+          # If you have dbt-expectations installed and your values set matches your project:
+          # - dbt_expectations.expect_column_values_to_be_in_set:
+          #     value_set: ['credit_card','boleto','debit_card','voucher','other','unknown']
